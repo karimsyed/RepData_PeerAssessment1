@@ -1,11 +1,6 @@
----
-title: "Reproducible Research: Assignment 1"
-author: "Syed karim"
-date: "March 10, 2017"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Assignment 1
+Syed karim  
+March 10, 2017  
 
 
 #Data#
@@ -25,7 +20,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 #Loading and preprocessing the data#
 Download the zip file, unzip it, and load the file into a data frame
-```{r echo=TRUE}
+
+```r
 library(lattice)
 if(!file.exists("activity.csv"))
 {
@@ -36,57 +32,66 @@ unlink(temp)
 }
 
 data<-read.csv("activity.csv")
-
 ```
 
 #What is mean total number of steps taken per day?#
 First addup the steps taken everyday. Mean and Median of the steps are calculated and a Histogram is drawn
-```{r echo=TRUE}
+
+```r
 stepsPerDay<-aggregate(steps~date, data, sum)
 hist(stepsPerDay$steps, main=paste("Histogram of Total number of steps everyday"), col = "red", xlab="Steps/day")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 Smean<-mean(stepsPerDay$steps)
 Smedian<-median(stepsPerDay$steps)
-
 ```
-The Mean total number of steps taken is= `r Smean` 
+The Mean total number of steps taken is= 1.0766189\times 10^{4} 
 
 
-The Median total number of steps taken is = `r Smedian`
+The Median total number of steps taken is = 10765
 
 
 #What is the average daily activity pattern?#
 
-```{r echo=TRUE}
+
+```r
 stepPerInterval<-aggregate(steps~interval, data, mean, na.rm=T)
 names(stepPerInterval)[2]<-"meanOfSteps"
 plot(stepPerInterval$interval, stepPerInterval$meanOfSteps, type="l", main="Average number of Intervel per Day",xlab = "Intervals", ylab = "Steps")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 max_step<-stepPerInterval$interval[which.max(stepPerInterval$meanOfSteps)]
-
 ```
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? Answer=
-```{r echo=FALSE}
-max_step
+
+```
+## [1] 835
 ```
 
 #Imputing missing values#
-```{r echo=TRUE}
+
+```r
 #missing value
 totalMissingValue<-sum(!complete.cases(data))
 ```
 Total number of missing Value=
-```{r echo=FALSE}
 
-totalMissingValue
+```
+## [1] 2304
 ```
 
 
 
 I have used the mean for the 5-minute interval to populate NA values for a given internval.
 
-```{r echo=TRUE}
 
+```r
 newData<-merge(data, stepPerInterval, by = "interval")
 
 newData$steps[is.na(newData$steps)]<-as.integer(round(newData$meanOfSteps[is.na(newData$steps)]))
@@ -96,21 +101,28 @@ newData<-newData[keeps]
 #creating new Historam
 newTotalSteps<-aggregate(steps~date, newData,sum)
 hist(newTotalSteps$steps, main = "Total Steps taken Each Day", xlab="Sum of Steps", col="red")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+```r
 #calculating mean and median
 newMean<-mean(newTotalSteps$steps)
 newMedian<-median(newTotalSteps$steps)
 ```
 New Mean =
-```{r echo=FALSE}
-newMean
+
+```
+## [1] 10765.64
 ```
 New Median=
-```{r echo=FALSE}
-newMedian
+
+```
+## [1] 10762
 ```
 #Are there differences in activity patterns between weekdays and weekends?#
-```{r echo=TRUE}
+
+```r
 #defining weekend and weekdays
 lastNewData<-newData
 weekend<-weekdays(as.Date(lastNewData$date))%in%c("Satureday", "Sunday")
@@ -123,7 +135,10 @@ lastInterval<-aggregate(lastNewData$steps~lastNewData$interval+lastNewData$type,
 
 Below panel plot is used to identify activity pattern the differences between weekdays and weekends
 
-```{r echo=TRUE}
+
+```r
 xyplot(lastInterval$`lastNewData$steps`~lastInterval$`lastNewData$interval`|lastInterval$`lastNewData$type`, lastInterval,
        main="Average Steps Taken by Interval", type="l", xlab="Intervals", ylab = "Average Steps", layout=c(1,2))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
